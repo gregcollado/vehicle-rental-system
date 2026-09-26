@@ -1,6 +1,6 @@
-# Vehicle Rental Management API
+# Vehicle Rental System
 
-API REST para la gestión de un negocio de renta de vehículos, construida con **Java 21** y **Spring Boot**. Incluye autenticación con JWT, control de roles, lógica de negocio para rentas/pagos/mantenimientos, y documentación interactiva con Swagger/OpenAPI.
+Monorepo para un sistema de renta de vehículos. El backend REST usa **Java 21**, **Spring Boot 3.4.3**, PostgreSQL y JWT. El frontend será una aplicación multipágina con HTML/CSS/JavaScript vanilla; su UI ya está diseñada en Figma y el código actual es solo el scaffold inicial.
 
 Proyecto desarrollado como ejercicio de arquitectura backend, con énfasis en separación de responsabilidades, consistencia de estados entre módulos y trazabilidad de operaciones.
 
@@ -25,7 +25,7 @@ Proyecto desarrollado como ejercicio de arquitectura backend, con énfasis en se
 ## Stack tecnológico
 
 - **Java 21**
-- **Spring Boot 4** (Web, Data JPA, Security, Validation)
+- **Spring Boot 3.4.3** (Web, Data JPA, Security, Validation)
 - **PostgreSQL**
 - **JWT** (autenticación stateless, vía `jjwt`)
 - **Lombok**
@@ -181,13 +181,15 @@ Para el razonamiento detallado detrás de las decisiones de diseño (snapshots d
 Requiere tener [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado y corriendo.
 
 1. Clona el repositorio
-2. En la raíz del proyecto, ejecuta:
+2. Desde la raíz del repositorio, ejecuta:
 
 ```bash
-docker-compose --env-file .env.docker up --build
+docker compose -f backend/docker-compose.yml --env-file backend/.env.docker up -d --build
 ```
 
-> ⚠️ Es necesario el flag `--env-file .env.docker` — el archivo `.env.docker` incluido en el repositorio contiene valores de demostración (no son credenciales reales de producción) necesarios para levantar la aplicación y la base de datos correctamente.
+El archivo `backend/.env.docker` contiene valores de demostración, no credenciales de producción. Para iniciar solo PostgreSQL, usa el mismo comando terminando en `up -d db`. Para reconstruir la API sin bajar la base, usa `up -d --build app`.
+
+> PostgreSQL aún no tiene un volumen nombrado en Compose. No ejecutes `docker compose down` si necesitas conservar la base actual: eliminaría el contenedor y sus datos. La migración a un volumen queda pendiente hasta hacer un respaldo.
 
 3. Una vez que los contenedores estén arriba, la API estará disponible en `http://localhost:8080`
 4. La documentación interactiva estará en `http://localhost:8080/swagger-ui/index.html`
@@ -205,7 +207,7 @@ Al iniciar, la aplicación crea automáticamente los roles `ADMIN`/`EMPLOYEE` y 
 Requiere Java 21, Maven y una instancia de PostgreSQL corriendo localmente.
 
 1. Crea una base de datos PostgreSQL (por ejemplo, `vehicle_rental`)
-2. Crea un archivo `.env` en la raíz del proyecto (puedes usar `.env.example` como plantilla) con tus credenciales reales:
+2. Configura `backend/.env` (usa `backend/.env.example` como plantilla) con tus credenciales locales. Para el backend ejecutado fuera de Docker, la URL debe usar `localhost`:
 
 ```
 DB_URL=jdbc:postgresql://localhost:5432/vehicle_rental
@@ -219,10 +221,10 @@ ADMIN_EMAIL=admin@tudominio.com
 ADMIN_PASSWORD=una_password_segura
 ```
 
-3. Si usas IntelliJ IDEA, instala el plugin **EnvFile** y habilítalo en la configuración de ejecución, apuntando a tu archivo `.env`
+3. Spring Boot no carga archivos `.env` automáticamente. Si usas IntelliJ IDEA, instala **EnvFile** y apunta la configuración de ejecución a `backend/.env`, o exporta las variables al proceso.
 4. Ejecuta la clase principal `SpringBootVehicleRentalAPI`
 
-> El archivo `.env` está incluido en `.gitignore` — **nunca** subas tus credenciales reales al repositorio.
+> `backend/.env` está ignorado por Git. **Nunca** subas credenciales reales al repositorio.
 
 ---
 
